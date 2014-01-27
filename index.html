@@ -39,7 +39,8 @@
 				<!-- Title -->
 				<section data-markdown>
 					<script type="text/markdown">
-					# Akka - Futures &amp; Actors
+					<h1>Akka - Futures &amp;</h1>
+					<h1>Actors</h1>
 					<p>
 						<small>Created by 
 							<a href="http://johnmurray.io">John Murray</a>
@@ -60,12 +61,13 @@
 						<script type="text/markdown">
 						## Overview - Things Covered
 
-						- Actors
-						  - Basic Usage
 						- Futures
 						  - Basic Usage
 						  - Actor Communication
 						  - Composition
+						  - Error Handling
+						- Actors
+						  - Basic Usage
 						- Lab Experiment
 						</script>
 					</section>
@@ -85,6 +87,501 @@
 						</script>
 					</section>
 				</section>
+
+				<!-- Futures - Overview -->
+				<section>
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+						</script>
+					</section>
+					
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+						Futures offer us a way to perform async or defered tasks.
+
+							Future { 
+								println("Hello")
+							}
+							println("World")
+
+						<aside class="notes">
+							<h2>Non-Deterministic Execution</h2>
+						</aside>
+						</script>
+					</section>
+					
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+						You can use callbacks to order program execution
+
+							Future { 
+								println("Hello")
+							}.onSuccess { case r => println("World") }
+						</script>
+					</section>
+					
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+						Futures are stateless (at least in that state _you_ can define)
+
+							Future { val i = 1 }
+							println(i)            #=> Compile-time error: not found: value i
+
+						<aside class="notes">
+							What I mean by that is, the Future holds <i>some</i> state such
+							as if it completed, succeeded, or failed, etc.
+						</aside>
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+						However, you can get the result in a callback  <br />
+						(as we&lsquo;ve already seen)
+
+							Future {
+								val i = 1
+								i
+							}.onSuccess { case r => println(r) }  #=> Output: 1
+
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+						Possible callbacks
+
+						- onSuccess
+						- onFailure
+						- onComplete
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+							val future = Future { 
+								val i = 1
+								i
+							}
+
+							future.onSuccess { case result => println(result) }
+							#=> output: 1
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+							val future = Future {
+								val i = 1
+								i / 0
+							}
+
+							future.onFailure { case t : Throwable => println(t.getMessage) }
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+							val future = Future {
+								liveDangerously  // throws exectpion 50% of time
+								"made it!"
+							}
+
+							future.onComplete { result =>
+								result match {
+									case Success(value) => println(value)
+									case Failure(t)     => println(t.getMessage)
+								}
+							}
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+						You can also block on Futures and wait for the result.
+
+							val future : Future[Int] = Future { val i = 1; i }
+							val result : Int         = Await.result(future, 2 seconds)
+
+							println(result)
+						</script>
+					</section>
+				</section>
+
+				<!-- Futures - Scala -->
+				<section>
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+						Just like we saw in the 
+						[Intro Course](http://scala-intro-refresher.presentations.johnmurray.io),
+						we can also map
+						`Future`s in the same way that we mapped `Option`s.
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+							val futureInt : Future[Int] = Future { 1 }
+							val futureStr : Future[String] = futureInt.map(res => res.toString)
+
+							futureStr.onSuccess{ case res => println(res) }
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+							case class User(firstName: String, lastName: String)
+
+							def getUserFromExternalService(id: Int): Future[User] = { ... }
+
+							def printUser(id: Int) = {
+								val userName = getUserFromExternalService(id).map { usr: User => 
+									s"${usr.firstName} ${usr.lastName}"
+								}
+
+								userName.onSuccess {
+									case name: String => println(name)
+								}
+							}
+
+						<aside class="notes">
+							Note that you should avoid using <pre>Await</pre> and I&lsquo;m really
+							just trying to provide samples that are easy to understand/run.
+						</aside>
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+							case class Car(driverId: Int)
+
+							def getCarFromexternalService(id: Int): Future[Car] = { ... }
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+							def printDriver(carId: Int) = {
+								val driverName = getCarFromexternalService(carId).map { car: Car =>
+									getUserFromExternalService(car.driverId).map { usr: User =>
+										s"${usr.firstName} ${user.lastName}"
+									}
+								}
+
+								// Future[Future[String]]
+
+								driverName.onSuccess { 
+									case dn => dn.onSuccess {
+										case dnPrime => println(dnPrime)
+									}
+								}
+							}
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+						We can do better than this. What tool do we reach for when we have this
+						nesting created by continued `map`ing?
+
+						<br />
+
+						`flatMap`!
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+							def printDriver(carId: Int) = {
+								val driverName = getCarFromexternalService(carId).flatMap { car: Car =>
+									getUserFromExternalService(car.driverId).map { usr: User =>
+										s"${usr.firstName} ${user.lastName}"
+									}
+								}
+
+								// Future[String]
+
+								driverName.onSuccess {
+									case dn => prinln(dn)
+								}
+							}
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+						And life would not be complete without a `for` comprehension
+
+						<br />
+
+						So... let&lsquo;s use one.
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+							def printDriver(carId: Int) = {
+								val driverName = for {
+									car  <- getCarFromexternalService(carId)
+									user <- getUserFromExternalService(car.driverId)
+								} yield (s"${user.firstName} ${user.lastName}"})
+
+								println(Await.result(driverName, 2 seconds))
+							}
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+						This is great!
+
+						<br />
+
+						We can transform / compose futures and combine them with other futures. This
+						makes for very powerful and flexible API for concurrent programming.
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+						But what about exceptions?
+
+						<br />
+
+						When I&lsquo;m doing all this "composing", what if an exception is
+						thrown?
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+						For example
+
+							def liveDangerously = { ... } // throws exception 50% of time
+
+							val future = Future {
+								liveDangerously
+								"Hello"
+							}
+
+							future.onSuccess(println)
+							future.onFailure(t : Throwable => println(t.getMessage))
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+						What happens if, for example, when the future fails I wanted to
+						provide a default value?
+
+						<br />
+
+						We can do this with `recover`
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+							val dangerousFuture : Future[String] = Future {
+								liveDangerously
+								"Hello"
+							} 
+
+							val safeFuture : Future[String] = dangerousFuture.recover {
+								case Throwable => "Cheerio"
+							}
+
+							safeFuture.onSuccess { result => println(result) }
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+						Your turn 
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+
+							def safeString(str: String, def: String) : Future[String] = {
+								dangerousString(str).recover {
+									case t: Throwable => def
+								}
+							}
+
+						    safeString("Hello", "Cheerio").flatMap{s : String =>
+						      safeString(s + " there", s + " good")
+						    }.flatMap{s: String =>
+						      safeString(s + " Frank", s + " sir")
+						    }						
+    					</script>
+					</section>
+					
+					<!--
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Scala
+						</script>
+					</section>
+					-->
+				</section>
+
+				<!-- Futures - Java -->
+				<section>
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Java
+						</script>
+					</section>
+
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Java
+
+						Uses the Scala API, but usage much more verbose since Java
+						doesn&lsquo;t currently support lambda expressions.
+
+						<br />
+
+						Let&lsquo;s just suffer for a moment so you can see what it
+						looks like.
+						</script>
+					</section>
+					
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Java
+
+						Hello World Future
+
+							Future<String> f = future(new Callable<String>() {
+								public String call() {
+									return "Hello" + " " + "World";
+								}
+							}, system.dispatcher());
+
+							f.onSuccess(new OnSuccess<String>() {
+								public final void onSuccess(String msg) {
+									System.out.println(msg);
+								}
+							});
+						</script>
+					</section>
+					
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Java
+
+						Same print-user example as before
+
+							public void printUser(int id) {
+								Future<String> userName = getUserFromExternalService(id).map(
+									new Mapper<User, String>() {
+										public String apply(User u) {
+											return u.firstName + " " + u.lastName;
+										}
+									}
+								);
+
+								System.out.println(Await.result(
+									userName,
+									new Duration(2).seconds,
+									system.dispatcher()
+								));
+							}
+						</script>
+					</section>
+					
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Java
+
+						Now the print-driver example that we saw before
+
+							public void printDriver(int carId) {
+							  Future<String> driverName = getCarFromexternalService(carId).flatMap(
+							    new Mapper<Car, Future<String>>() {
+							      public Future<String> apply(Car car) {
+							        getUserFromExternalService(car.driverId).map(
+							          new Mapper<User, String>() {
+							            public String apply(User u) {
+							              return u.firstName + " " + u.lastName;
+							            }
+							          }
+							        );
+							      }
+							    }
+							  );
+							  System.out.println(Await.result(driverName, new Duration(2).seconds, system.dispatcher()));
+							}
+						</script>
+					</section>
+					
+					<section data-markdown>
+						<script type="text/markdown">
+						## Futures - Java
+
+						Okay, enough of that. You get the point.
+						</script>
+					</section>
+				</section>
+
 				
 				<!-- Actors - Overview -->
 				<section>
@@ -141,42 +638,6 @@
 						<script type="text/markdown">
 						## Actor - Overview
 
-						Popular&rsquo;ish languages implementing the Actor model
-
-						- Scala (duh)
-						- Erlang
-						- Elixer
-						- D
-						- E
-						- Io
-						- Rust
-						- Go
-						</script>
-					</section>
-
-					<section data-markdown>
-						<script type="text/markdown">
-						## Actor - Overview
-
-						Actor frameworks also exist for many popular languages:
-
-						- Java
-						- C# / .NET
-						- F#
-						- Haskell
-						- Objective-C
-						- C++
-						- Clojure
-						- Ruby
-						- Python
-						- C
-						</script>
-					</section>
-
-					<section data-markdown>
-						<script type="text/markdown">
-						## Actor - Overview
-
 						An actor can be thought of as running in a seperate process as they
 						share no state with the outside world. 
 
@@ -220,7 +681,7 @@
 
 						<br />
 
-						Communication is done either by inter-thread communication or over TCP using a 
+						Communication is done either by inter-system communication or over TCP using a 
 						custom Akka protocol.
 
 						<aside class="notes">
@@ -244,8 +705,12 @@
 
 						All actors have a Supervisor. The supervisor is responsible for monitoring the
 						lifecycle of the Actor. This includes failures / errors and termination.
+						</script>
+					</section>
 
-						<br />
+					<section data-markdown>
+						<script type="text/markdown">
+						## Actor - Overview
 
 						The Supervisor to any given actor is the Actor that created it. The default
 						Actor in Akka is the "Guardian" actor.
@@ -258,10 +723,6 @@
 
 						Actors can be put behind a router, allowing you to do things like creating a
 						pool of workers.
-
-						<br />
-
-						Identical ActorSystems can also be clustered for larger installations
 						</script>
 					</section>
 
@@ -395,7 +856,7 @@
 							incActor ! 3
 							// ...
 
-							Patterns.ask(incActor, "getCount").onComplete {
+							Patterns.ask(incActor, "getCount").onSuccess {
 								count => println(count)
 							}
 
@@ -476,17 +937,8 @@
 					</section>
 				</section>
 
-				<!-- Futures -->
-				<section>
-					<section data-markdown>
-						<script type="text/markdown">
-						## Akka - Future
-						</script>
-					</section>
-				</section>
 
-
-				<!-- Assignment -->
+				<!-- Lab Time -->
 				<section data-markdown>
 					<script type="text/markdown">
 					## Akka - Lab Time
