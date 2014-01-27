@@ -11,7 +11,7 @@ object _3_Recovery {
   def madeSafe() : Future[String] = {
     import Util.dangerousString
 
-    // using 'recover', make this safe by providing defaults
+    // using 'recover', make this safe by providing default-values
     // at each point a failure could occur
 
     dangerousString("Hello").flatMap{s : String =>
