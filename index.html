@@ -88,6 +88,29 @@
 					</section>
 				</section>
 
+				<section>
+					<section data-markdown>
+						<script type="text/markdown">
+							## Setup
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/markdown">
+							## Setup
+
+							[Slides and Presentation on Github](http://git.io/4klpXw)
+
+								git clone git@github.com:JohnMurray/akka-actors-futures-presentation.git
+								cd akka-actors-futures-presentation/IntelliJProject
+								sbt gen-idea
+
+							+ `Intellij -> File -> Open`
+							+ `Select the "IntelliJProject" Folder`
+							+ `Click "Choose"`
+						</script>
+					</section>
+				</section>
+
 				<!-- Futures - Overview -->
 				<section>
 					<section data-markdown>
@@ -939,10 +962,100 @@
 
 
 				<!-- Lab Time -->
-				<section data-markdown>
-					<script type="text/markdown">
-					## Akka - Lab Time
-					</script>
+				<section>
+					<section data-markdown>
+						<script type="text/markdown">
+						## Lab 
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/markdown">
+						## Lab 
+
+						[Evernote of Exercise](https://www.evernote.com/shard/s280/sh/2ea78629-1835-4afb-8b4c-3cb76d1eed06/f30c9c607775fa90c22e98a600c44534)
+
+						<br />
+
+						Keep reading for an inline (uglier) version
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/markdown">
+						## Lab 
+
+						Using futures, you can make concurrent URL requests. With this you can make a 
+						simple “race” game. Let’s assume we wanted to have a race of the search 
+						engines, we could use three URLs like
+
+						<br />
+
+							http://www.google.com/#q=scala
+							http://www.bing.com/?q=scala
+							https://duckduckgo.com/?q=scala
+						
+						<br />
+
+						You could them time the completion of each request and print out the results 
+						once all of the futures have completed. 
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/markdown">
+						## Lab 
+
+						There is a twist to what you are going to be implementing. For each URL 
+						(whatever those URLs may be, choose wisely), you need to make more than 
+						one request. Let’s say that you actually need to make some number > 20 
+						requests. That means that if you choose to race 3 URLs for 100 each, your 
+						application will make 300 requests. However, for each URL, the requests 
+						need to be made serially. That means if you have 3 URLs, you will be making 
+						a max of 3 URL calls in parallel.
+
+						<br />
+
+						When this is completed you should print out the results of your race 
+						including total time taken (for the race), the average response time per 
+						URL, and the winner of the race.
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/markdown">
+						## Lab 
+
+						*Requirements*
+
+						- Must be completed in Scala
+						- Can use either Futures or Actors (or both), but must use at least one (no threads allowed)
+
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/markdown">
+						## Lab 
+
+						*Resources*
+
+ 						- [Future examples][1]
+ 						- [Starter Template][2] - download to get started with your project 
+ 						- [Akka Docs (Actors and Futures)][3]
+ 							- [Actor Docs][4]
+ 							- [Future Docs][5]
+ 						- [scalaj-http][6] - HTTP Client included in starter project 
+ 						- [simple “timing” wrapper][7] for timing various operations 
+ 						- [scala worksheets][8] - Runnable worksheets from previous workshop
+
+
+ 						  [1]: http://docs.scala-lang.org/overviews/core/futures.html
+ 						  [2]: https://github.com/JohnMurray/TestIntelliJSetup
+ 						  [3]: http://doc.akka.io/docs/akka/2.2.3/scala.html
+ 						  [4]: http://doc.akka.io/docs/akka/2.2.3/scala/actors.html
+ 						  [5]: http://doc.akka.io/docs/akka/2.2.3/scala/futures.html
+ 						  [6]: https://github.com/scalaj/scalaj-http
+ 						  [7]: https://gist.github.com/JohnMurray/8562630
+ 						  [8]: https://github.com/JohnMurray/learn-scala-worksheets
+
+						</script>
+					</section>
 				</section>
 
 
