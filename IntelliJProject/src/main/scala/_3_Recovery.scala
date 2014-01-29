@@ -1,11 +1,6 @@
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-/**
- * Author: John Murray <jmurray@appnexus.com>
- * Date:   1/27/14
- *
- * DESCRIPTION
- */
 object _3_Recovery {
 
   def madeSafe() : Future[String] = {

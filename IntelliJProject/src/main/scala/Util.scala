@@ -1,4 +1,5 @@
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object Util {
 
@@ -22,8 +23,10 @@ object Util {
   }
 
   def dangerousString(str: String) : Future[String] ={
-    liveDangerously()
-    Future.successful(str)
+    Future {
+      liveDangerously()
+      str
+    }
   }
 
 }

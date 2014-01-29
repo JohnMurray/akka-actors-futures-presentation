@@ -1,3 +1,6 @@
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
 object _1_FutureMap {
 
   def printUser(): Unit = {
